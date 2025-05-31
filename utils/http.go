@@ -5,6 +5,8 @@ import (
 	"net"
 	"strings"
 	"os"
+	"mime"
+	"path/filepath"
 )
 
 // header
@@ -27,19 +29,25 @@ import (
 // Accept-Language: en-US,en;q=0.9
 
 func serveFile(filename string, connection net.Conn) {
-	filePath := "static/" + filename 
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		fmt.Fprint(connection, "HTTP/1.1 500 Internal Server Error\r\n\r\nCould not read file")
-		return
-	}
+    filePath := "static/" + filename
+    content, err := os.ReadFile(filePath)
+    if err != nil {
+        fmt.Fprint(connection, "HTTP/1.1 500 Internal Server Error\r\n\r\nCould not read file")
+        return
+    }
 
-	response := "HTTP/1.1 200 OK\r\n" +
-		"Content-Type: text/html\r\n" +
-		fmt.Sprintf("Content-Length: %d\r\n", len(content)) +
-		"\r\n" +
-		string(content)
-	fmt.Fprint(connection, response)
+    ext := filepath.Ext(filename)
+    contentType := mime.TypeByExtension(ext)
+    if contentType == "" {
+        contentType = "application/octet-stream"
+    }
+
+    response := "HTTP/1.1 200 OK\r\n" +
+        fmt.Sprintf("Content-Type: %s\r\n", contentType) +
+        fmt.Sprintf("Content-Length: %d\r\n", len(content)) +
+        "\r\n" + string(content)
+
+    fmt.Fprint(connection, response)
 }
 
 func HandleRequest(lines []string, connection net.Conn) {
@@ -88,14 +96,30 @@ func HandleRequest(lines []string, connection net.Conn) {
 		fmt.Printf("%s : %s\n", k, v)
 	}
 
-    switch path {
-    case "/get":
-        fmt.Println("/get/", path)
-        serveFile("index.html", connection)
-    case "/find":
-        fmt.Println("/find", path)
-    default:
-        fmt.Println("Page not found")
+    // switch path {
+    // case "/get":
+    //     fmt.Println("/get/", path)
+    //     serveFile("index.html", connection)
+    // case "/find":
+    //     fmt.Println("/find", path)
+    // default:
+    //     fmt.Println("Page not found")
+    // }
+
+
+     var routes = map[string]func(net.Conn){
+        "/get": func(conn net.Conn) { serveFile("index.html", conn) },
+        "/":    func(conn net.Conn) { serveFile("index.html", conn) },
+        "/api": func(conn net.Conn) {
+            response := `{"message": "Hello from API"}`
+            fmt.Fprintf(conn, "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: %d\r\n\r\n%s", len(response), response)
+        },
     }
 
+    // Call the handler if path exists, else return 404
+    if handler, ok := routes[path]; ok {
+        handler(connection)
+    } else {
+        fmt.Fprint(connection, "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\n404 page not found")
+    }
 }
