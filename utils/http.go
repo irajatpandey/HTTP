@@ -2,31 +2,13 @@ package utils
 
 import (
 	"fmt"
-	"net"
-	"strings"
-	"os"
 	"mime"
+	"net"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
-// header
-// GET /find/ HTTP/1.1
-// Host: localhost:8080
-// Connection: keep-alive
-// Cache-Control: max-age=0
-// sec-ch-ua: "Chromium";v="136", "Google Chrome";v="136", "Not.A/Brand";v="99"
-// sec-ch-ua-mobile: ?0
-// sec-ch-ua-platform: "Windows"
-// Upgrade-Insecure-Requests: 1
-// DNT: 1
-// User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36
-// Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
-// Sec-Fetch-Site: cross-site
-// Sec-Fetch-Mode: navigate
-// Sec-Fetch-User: ?1
-// Sec-Fetch-Dest: document
-// Accept-Encoding: gzip, deflate, br, zstd
-// Accept-Language: en-US,en;q=0.9
 
 func serveFile(filename string, connection net.Conn) {
     filePath := "static/" + filename
@@ -95,17 +77,6 @@ func HandleRequest(lines []string, connection net.Conn) {
 	for k, v := range headers {
 		fmt.Printf("%s : %s\n", k, v)
 	}
-
-    // switch path {
-    // case "/get":
-    //     fmt.Println("/get/", path)
-    //     serveFile("index.html", connection)
-    // case "/find":
-    //     fmt.Println("/find", path)
-    // default:
-    //     fmt.Println("Page not found")
-    // }
-
 
      var routes = map[string]func(net.Conn){
         "/get": func(conn net.Conn) { serveFile("index.html", conn) },
