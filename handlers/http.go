@@ -19,7 +19,7 @@ func HandleRequest(lines []string, connection net.Conn) {
 	for _, line := range lines {
     fmt.Println(line)
 	}
-	fmt.Println("******************\n")
+	fmt.Println("******************")
 	// Parse the request line
 	requestLine := lines[0]
 	fields := strings.Fields(requestLine)
