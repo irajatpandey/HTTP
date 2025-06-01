@@ -1,7 +1,8 @@
 package main
 
 import (
-	"HTTP/utils" // Importing the utils package for handling requests
+	// Importing the utils package for handling requests
+	"HTTP/handlers"
 	"bufio"
 	"fmt"
 	"net"
@@ -68,6 +69,6 @@ func handleConnection(connection net.Conn) {
 		return
 	}
 	// Now pass the full request (line + headers) to your handler
-	utils.HandleRequest(requestLines, connection)
+	handlers.HandleRequest(requestLines, connection)
 	
 }
